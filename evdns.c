@@ -2599,6 +2599,40 @@ sockaddr_getport(struct sockaddr *sa)
 
 /* exported function */
 int
+evdns_base_is_nameserver_present(struct evdns_base *base, const char *ip) {
+	const struct nameserver *server = base->server_head, *const started_at = base->server_head;
+	struct sockaddr_storage ss;
+	struct sockaddr *sa;
+	int found = 0;
+	int len = sizeof(ss);
+
+	if (evutil_parse_sockaddr_port(ip, (struct sockaddr *)&ss,
+		&len)) {
+		log(EVDNS_LOG_WARN, "Unable to parse nameserver address %s",
+			ip);
+		return -1;
+	}
+	sa = (struct sockaddr *) &ss;
+	if (sockaddr_getport(sa) == 0)
+		sockaddr_setport(sa, 53);
+
+	EVDNS_LOCK(base);
+	if (server) {
+		do {
+			if (!evutil_sockaddr_cmp((struct sockaddr*)&server->address, sa, 1)){
+				found = 1;
+				break;
+			}
+			server = server->next;
+		} while (server != started_at);
+	};
+	EVDNS_UNLOCK(base);
+
+	return found;
+}
+
+/* exported function */
+int
 evdns_base_nameserver_ip_add(struct evdns_base *base, const char *ip_as_string) {
 	struct sockaddr_storage ss;
 	struct sockaddr *sa;

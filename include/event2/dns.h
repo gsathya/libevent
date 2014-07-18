@@ -317,6 +317,15 @@ EVENT2_EXPORT_SYMBOL
 int evdns_base_resume(struct evdns_base *base);
 
 /**
+  Check if given nameserver has been setup already.
+
+  @param base the evdns_base to which to apply this operation
+  @return 0 if false, 1 if true or -1 if an error occurred
+ */
+EVENT2_EXPORT_SYMBOL
+int evdns_base_is_nameserver_present(struct evdns_base *base, const char *ip);
+
+/**
   Add a nameserver by string address.
 
   This function parses a n IPv4 or IPv6 address from a string and adds it as a
